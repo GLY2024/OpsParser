@@ -1,6 +1,9 @@
 # Opstool output
 _OPSTOOL_ODB/
 
+# Cursor rules
+.Cursor
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
