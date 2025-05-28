@@ -4,17 +4,33 @@ import functools
 import types
 from collections import defaultdict
 
-from ._manager import BaseHandler, ElementManager, LoadManager, MaterialManager, NodeManager, TimeSeriesManager
+from ._manager import (
+    BaseHandler, ElementManager, LoadManager, MaterialManager, NodeManager, 
+    TimeSeriesManager, SectionManager, ConstraintManager, RegionManager, 
+    RayleighManager, BlockManager, BeamIntegrationManager, FrictionModelManager, 
+    GeomTransfManager, AnalysisManager, RecorderManager, UtilityManager
+)
 
 
 class OpenSeesCommand(enum.Enum):
     # Enum members' values are the manager classes themselves.
-    # IMPORTANT: NodeManager, ElementManager, etc., MUST be implemented as singletons(DONE by Metaclass)
+    # IMPORTANT: All Manager classes MUST be implemented as singletons (DONE by Metaclass)
     NODE = NodeManager
     ELEMENT = ElementManager
     MATERIAL = MaterialManager
-    # TIMESERIES = TimeSeriesManager # Uncomment when TimeSeriesManager is a singleton
-    # LOAD = LoadManager           # Uncomment when LoadManager is a singleton
+    TIMESERIES = TimeSeriesManager
+    LOAD = LoadManager
+    SECTION = SectionManager
+    CONSTRAINT = ConstraintManager
+    REGION = RegionManager
+    RAYLEIGH = RayleighManager
+    BLOCK = BlockManager
+    BEAM_INTEGRATION = BeamIntegrationManager
+    FRICTION_MODEL = FrictionModelManager
+    GEOM_TRANSF = GeomTransfManager
+    ANALYSIS = AnalysisManager
+    RECORDER = RecorderManager
+    UTILITY = UtilityManager
 
     @property
     def instance(self) -> BaseHandler:

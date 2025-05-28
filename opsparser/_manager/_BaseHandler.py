@@ -30,7 +30,7 @@ class SingletonMeta(ABCMeta):
         try:
             attr = super().__getattribute__(name)
         except AttributeError:
-            # If the class doesn’t have the attribute, delegate the lookup
+            # If the class doesn't have the attribute, delegate the lookup
             # to the singleton instance (this preserves the old __getattr__
             # semantics).
             instance = cls()
@@ -229,6 +229,62 @@ class BaseHandler(ABC, metaclass=SingletonMeta):
         return result
 
     @staticmethod
+    def _extract_args_with_strings(lst: list[Any], target_keys: Union[str, list, tuple, set], max_count: int = 1) -> list[Any]:
+        """Return the values *following* any of *target_keys* including string values.
+
+        Parameters
+        ----------
+        lst : list[Any]
+            The full argument list.
+        target_keys : Union[str, list, tuple, set]
+            A single key or an iterable of keys that should be searched for.
+        max_count : int, optional
+            Maximum number of arguments to extract after the target key.
+
+        Returns
+        -------
+        list[Any]
+            List of values (including strings) following any target key.
+
+        Notes
+        -----
+        - If lst is None or empty, returns an empty list
+        - If target_keys is None, treats it as an empty collection
+        - If no target key is found, returns an empty list
+        """
+        if lst is None or len(lst) == 0:
+            return []
+
+        result: list[Any] = []
+        found = False
+        count = 0
+
+        if target_keys is None:
+            target_keys = set()
+        elif isinstance(target_keys, str):
+            target_keys = {target_keys}
+        else:
+            try:
+                target_keys = set(target_keys)
+            except (TypeError, ValueError):
+                target_keys = {target_keys}
+
+        for item in lst:
+            if found:
+                if count >= max_count:
+                    break
+                # Don't break on strings, include them
+                if isinstance(item, str) and item.startswith('-'):
+                    # Stop if we encounter another option flag
+                    break
+                result.append(item)
+                count += 1
+            elif not isinstance(item, list) and item in target_keys:
+                found = True
+
+        return result
+
+    @staticmethod
     def _parse_rule_based_command(rule: dict[str, Any], *args: Any, **kwargs:Any) -> dict[str, Any]:
         """Parse command arguments according to a specific rule."""
         result: dict[str, Any] = {}
@@ -334,7 +390,12 @@ class BaseHandler(ABC, metaclass=SingletonMeta):
         for flag, name in rule.get("options", {}).items():
             pure_flag = flag.split('*')[0].rstrip('?')
             if pure_flag in arg_list:
-                values = BaseHandler._extract_args_by_str(arg_list, pure_flag)
+                # Special handling for string options like -file
+                if pure_flag in ['-file', '-xml', '-binary', '-time']:
+                    values = BaseHandler._extract_args_with_strings(arg_list, pure_flag, 1)
+                else:
+                    values = BaseHandler._extract_args_by_str(arg_list, pure_flag)
+                    
                 idx = 0
                 stop_idx = len(values)
                 if isinstance(name, str):
@@ -353,7 +414,7 @@ class BaseHandler(ABC, metaclass=SingletonMeta):
                         result[clean_name] = values[idx] if count == 1 else None if count == 0 else values[idx:idx + count]
                         idx += count
                     elif isinstance(count, str) and count == "all":
-                        result[clean_name] = values[idx:stop_idx] if stop_idx > idx else values[idx]
+                        result[clean_name] = values[idx:stop_idx] if stop_idx > idx else []
                         idx = stop_idx
                     else:
                         # Handle unknown count format

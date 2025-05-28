@@ -4,80 +4,102 @@ from typing import Any, Optional
 
 class LoadManager(BaseHandler):
     def __init__(self):
-        self.patterns = {}  # 荷载模式: tag -> {type, tsTag, ...}
-        self.node_loads = {}  # 节点荷载: (patternTag, nodeTag) -> values
-        self.ele_loads = {}  # 单元荷载: (patternTag, eleTag) -> values
-        self.current_pattern = None  # 当前荷载模式
+        self.patterns = {}  # Load patterns: tag -> {type, tsTag, ...}
+        self.node_loads = {}  # Node loads: (patternTag, nodeTag) -> values
+        self.ele_loads = {}  # Element loads: (patternTag, eleTag) -> values
+        self.current_pattern = None  # Current load pattern
+
+    @property
+    def _COMMAND_RULES(self) -> dict[str, dict[str, Any]]:
+        return {
+            # pattern(patternType, patternTag, tsTag, *args)
+            "pattern": {
+                "positional": ["patternType", "patternTag", "tsTag", "args*"],
+                "options": {
+                    "-factor?": "factor",
+                },
+            },
+            # load(nodeTag, *loadValues)
+            "load": {
+                "positional": ["nodeTag", "loadValues*"],
+            },
+            # eleLoad(*args)
+            "eleLoad": {
+                "positional": ["args*"],
+            },
+        }
 
     def handles(self):
         return ["pattern", "load", "eleLoad"]
 
     def handle(self, func_name: str, arg_map: dict[str, Any]):
+        args, kwargs = arg_map.get("args"), arg_map.get("kwargs")
         if func_name == "pattern":
-            self._handle_pattern(arg_map)
+            self._handle_pattern(*args, **kwargs)
         elif func_name == "load":
-            self._handle_load(arg_map)
+            self._handle_load(*args, **kwargs)
         elif func_name == "eleLoad":
-            self._handle_eleLoad(arg_map)
+            self._handle_eleLoad(*args, **kwargs)
 
-    def _handle_pattern(self, arg_map: dict[str, Any]):
-        """处理荷载模式命令"""
-        # pattern patternType? patternTag tsTag <-factor factor>?
-        pattern_type = arg_map.get("typeName", "")
-        tag = arg_map.get("tag", 0)
-        args = arg_map.get("args", [])
+    def _handle_pattern(self, *args: Any, **kwargs: Any):
+        """Handle load pattern command"""
+        arg_map = self._parse("pattern", *args, **kwargs)
+        
+        pattern_type = arg_map.get("patternType", "")
+        tag = arg_map.get("patternTag", 0)
+        ts_tag = arg_map.get("tsTag", 0)
+        extra_args = arg_map.get("args", [])
 
-        if not pattern_type or tag == 0 or not args:
+        if not pattern_type or tag == 0:
             return
-
-        # 第一个参数通常是时程标签
-        ts_tag = int(args[0])
 
         pattern_info = {"type": pattern_type, "tsTag": ts_tag}
 
-        # 检查是否有factor选项
-        if "-factor" in args and args.index("-factor") + 1 < len(args):
-            factor_idx = args.index("-factor") + 1
-            pattern_info["factor"] = float(args[factor_idx])
+        # Check for factor option
+        if "factor" in arg_map:
+            pattern_info["factor"] = arg_map["factor"]
+
+        if extra_args:
+            pattern_info["args"] = extra_args
 
         self.patterns[tag] = pattern_info
-        # 更新当前荷载模式
+        # Update current load pattern
         self.current_pattern = tag
 
-    def _handle_load(self, arg_map: dict[str, Any]):
-        """处理节点荷载命令"""
-        # load nodeTag? <Fx Fy Fz Mx My Mz>?
-        tag = arg_map.get("tag")  # 节点标签
-        args = arg_map.get("args", [])  # 荷载分量
+    def _handle_load(self, *args: Any, **kwargs: Any):
+        """Handle node load command"""
+        arg_map = self._parse("load", *args, **kwargs)
+        
+        tag = arg_map.get("nodeTag")  # Node tag
+        load_values = arg_map.get("loadValues", [])  # Load components
 
-        if tag is None or not args:
+        if tag is None or not load_values:
             return
 
-        # 使用当前荷载模式
+        # Use current load pattern
         pattern_tag = self.current_pattern
         if pattern_tag is None:
             return
 
-        # 存储节点荷载，键为(荷载模式标签, 节点标签)元组
+        # Store node load with key as (load pattern tag, node tag) tuple
         load_key = (pattern_tag, tag)
-        self.node_loads[load_key] = args
+        self.node_loads[load_key] = load_values
 
-    def _handle_eleLoad(self, arg_map: dict[str, Any]):
-        """处理单元荷载命令"""
-        # eleLoad -ele eleTag1 eleTag2 ... -type -beamUniform Wy <Wz> ...
-        # 或 eleLoad -range startEleTag endEleTag -type -beamUniform ...
+    def _handle_eleLoad(self, *args: Any, **kwargs: Any):
+        """Handle element load command"""
+        arg_map = self._parse("eleLoad", *args, **kwargs)
         args = arg_map.get("args", [])
 
-        # 获取荷载类型
+        # Get load type
         load_type = ""
         if "-type" in args and args.index("-type") + 1 < len(args):
             type_idx = args.index("-type") + 1
             load_type = args[type_idx]
 
-        # 提取单元标签列表
+        # Extract element tag list
         ele_tags = []
 
-        # 检查是否有-ele选项
+        # Check for -ele option
         if "-ele" in args:
             ele_idx = args.index("-ele") + 1
             while ele_idx < len(args) and not args[ele_idx].startswith("-"):
@@ -87,17 +109,17 @@ class LoadManager(BaseHandler):
                 except (ValueError, TypeError):
                     break
 
-        # 检查是否有-range选项
+        # Check for -range option
         if "-range" in args and args.index("-range") + 2 < len(args):
             range_idx = args.index("-range")
             start_tag = int(args[range_idx + 1])
             end_tag = int(args[range_idx + 2])
             ele_tags.extend(range(start_tag, end_tag + 1))
 
-        # 提取荷载分量值
+        # Extract load component values
         load_values = []
 
-        # 对于-beamUniform类型的荷载
+        # For -beamUniform type loads
         if load_type == "-beamUniform" and "-beamUniform" in args:
             beam_idx = args.index("-beamUniform") + 1
             while beam_idx < len(args) and not args[beam_idx].startswith("-"):
@@ -107,34 +129,34 @@ class LoadManager(BaseHandler):
                 except (ValueError, TypeError):
                     break
 
-        # 使用当前荷载模式
+        # Use current load pattern
         pattern_tag = self.current_pattern
         if pattern_tag is None:
             return
 
-        # 存储每个单元的荷载
+        # Store load for each element
         for ele_tag in ele_tags:
             load_key = (pattern_tag, ele_tag)
             self.ele_loads[load_key] = {"type": load_type, "values": load_values}
 
     def get_pattern(self, tag: int) -> Optional[dict]:
-        """获取指定标签的荷载模式"""
+        """Get load pattern by tag"""
         return self.patterns.get(tag)
 
     def get_node_load(self, pattern_tag: int, node_tag: int) -> list[float]:
-        """获取指定荷载模式下节点的荷载"""
+        """Get node load under specified load pattern"""
         return self.node_loads.get((pattern_tag, node_tag), [])
 
     def get_ele_load(self, pattern_tag: int, ele_tag: int) -> dict:
-        """获取指定荷载模式下单元的荷载"""
+        """Get element load under specified load pattern"""
         return self.ele_loads.get((pattern_tag, ele_tag), {})
 
     def get_patterns_by_time_series(self, ts_tag: int) -> list[int]:
-        """获取使用特定时程的所有荷载模式"""
+        """Get all load patterns using specific time series"""
         return [tag for tag, info in self.patterns.items() if info.get("tsTag") == ts_tag]
 
     def clear(self):
-        """清除所有数据"""
+        """Clear all data"""
         self.patterns.clear()
         self.node_loads.clear()
         self.ele_loads.clear()
