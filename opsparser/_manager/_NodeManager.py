@@ -17,6 +17,8 @@ class NodeManager(BaseHandler):
     @property
     def newtag_upper(self):
         """return a new tag that is max of all tags + 1"""
+        if not self.nodes:  # Fixed: Check if empty
+            return 1
         return max(self.nodes)+1
     
     def get_new_tags(self, num: int, start: int = 1) -> list[int]:

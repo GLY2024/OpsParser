@@ -53,6 +53,8 @@ class MaterialManager(BaseHandler):
     @property
     def newtag_upper(self):
         """return a new tag that is max of all tags + 1"""
+        if not self.materials:  # Fixed: Check if empty
+            return 1
         return max(self.materials)+1
     
     def get_new_tags(self, num: int, start: int = 1) -> list[int]:
