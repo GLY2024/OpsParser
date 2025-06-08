@@ -10,6 +10,7 @@ from ._manager import (
     RayleighManager, BlockManager, BeamIntegrationManager, FrictionModelManager, 
     GeomTransfManager, AnalysisManager, RecorderManager, UtilityManager
 )
+from .enhanced_opensees import EnhancedOpenSees, enhance_opensees
 
 
 class OpenSeesCommand(enum.Enum):
@@ -47,11 +48,16 @@ class OpenSeesParser:
         self.module = module
         self.call_log: defaultdict[str, List[Any]] = defaultdict(list)
         self.original_functions: dict[str, Any] = {}
-
-        # self.handler_instances dictionary is no longer needed here.
-        # The OpenSeesCommand enum will be the source of truth for handler instances.
+        self.enhanced_opensees = None
         
         self.dispatch_table: dict[str, BaseHandler] = self._build_dispatch_table()
+    
+    def enhance(self, module=None, debug=False):
+        if module is None:
+            module = self.module
+        if self.enhanced_opensees is None:
+            self.enhanced_opensees = enhance_opensees(module, debug)
+        return self.enhanced_opensees
 
     def _build_dispatch_table(self) -> dict[str, BaseHandler]:
         """Build a dispatch table mapping function names to handlers."""
