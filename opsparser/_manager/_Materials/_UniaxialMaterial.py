@@ -16,7 +16,7 @@ material_list =  [
     "PySimple1", "TzSimple1", "QzSimple1", "PyLiq1", "TzLiq1", "QzLiq1",
 
     # 其他单轴材料
-    "Hardening", "CastFuse", "ViscousDamper", "BilinearOilDamper", "Bilin",
+    "Hardening", "Cast", "ViscousDamper", "BilinearOilDamper", "Bilin",
     "ModIMKPeakOriented", "ModIMKPinching", "SAWS", "BarSlip", "Bond_SP01",
     "Fatigue", "Impact", "HyperbolicGap", "LimitState", "MinMax", "ElasticBilin",
     "ElasticMultiLinear", "MultiLinear", "InitialStrain", "InitialStress",

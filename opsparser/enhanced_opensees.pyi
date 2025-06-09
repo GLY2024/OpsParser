@@ -3,7 +3,8 @@ from typing import overload, Literal, Optional, Any, Union, List, Dict
 # Import all specialized command classes
 from ._ide_support.basic import BasicCommands
 from ._ide_support.elements import ElementCommands  
-from ._ide_support.materials import MaterialCommands
+from ._ide_support.uniaxialmaterials import uniaxialMaterialCommands
+from ._ide_support.ndmaterials import nDMaterialCommands
 from ._ide_support.geometry import GeometryCommands
 from ._ide_support.loads import LoadCommands
 from ._ide_support.analysis import AnalysisCommands
@@ -12,7 +13,8 @@ from ._ide_support.utilities import UtilityCommands
 class EnhancedOpenSees(
     BasicCommands,
     ElementCommands, 
-    MaterialCommands,
+    uniaxialMaterialCommands,
+    nDMaterialCommands,
     GeometryCommands,
     LoadCommands,
     AnalysisCommands,
@@ -23,7 +25,8 @@ class EnhancedOpenSees(
     This class inherits type annotations from specialized command classes:
     - BasicCommands: model, node, mass, fix, equalDOF, rigidDiaphragm
     - ElementCommands: element (with smart parameter hints for different element types)
-    - MaterialCommands: uniaxialMaterial, nDMaterial (with material-specific parameters)
+    - uniaxialMaterialCommands: uniaxialMaterial (with material-specific parameters)
+    - nDMaterialCommands: nDMaterial (with material-specific parameters)
     - GeometryCommands: geomTransf (with transformation-specific parameters)
     - LoadCommands: timeSeries, pattern, load, eleLoad
     - AnalysisCommands: constraints, numberer, system, test, algorithm, integrator, analysis, analyze, eigen
