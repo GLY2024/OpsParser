@@ -118,10 +118,6 @@ class MaterialManager(BaseHandler):
         }
         self.materials[matTag] = matinfo
 
-    def get_material(self, matTag: int) -> Optional[dict]:
-        """Get material information by tag"""
-        return self.materials.get(matTag)
-
     @property
     def nDMaterial_list(self):
         return self._command2typehandler["nDMaterial"].keys()
@@ -131,6 +127,7 @@ class MaterialManager(BaseHandler):
         return self._command2typehandler["uniaxialMaterial"].keys()
     
     def get_material(self, matTag:int) -> dict:
+        """Get material information by tag"""
         return self.materials.get(matTag, None)
 
     def get_materials_by_type(self, matType: str) -> list[int]:
