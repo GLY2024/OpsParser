@@ -17,6 +17,7 @@ def demo():
     
     # Clear the model
     ops.wipe()
+
     
     # Basic model
     ops.model('basic', '-ndm', 2, '-ndf', 3)

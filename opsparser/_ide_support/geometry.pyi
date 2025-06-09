@@ -1,69 +1,80 @@
-"""几何变换命令类型注解"""
+"""Geometry transformation command type annotations"""
 
-from typing import overload, Literal, Optional, Any
+from typing import overload, Literal, Optional, Any, List
 
 class GeometryCommands:
-    """几何变换命令的类型注解"""
+    """Type annotations for geometry transformation commands"""
     
     # Linear transformation
     @overload  
-    def geomTransf(self, transf_type: Literal["Linear"], transf_tag: int, vec_x_z: Optional[float] = None, vec_y_z: Optional[float] = None, vec_z_z: Optional[float] = None) -> None:
+    def geomTransf(self, transf_type: Literal["Linear"], transf_tag: int, vec_x: Optional[float] = None, vec_y: Optional[float] = None, vec_z: Optional[float] = None, jnt_offset: Optional[Literal["-jntOffset"]] = None, *offsets: float) -> None:
         """Define linear coordinate transformation
         
         Args:
             transf_type: Transformation type 'Linear'
-            transf_tag: Unique transformation identifier  
-            vec_x_z, vec_y_z, vec_z_z: Vector components defining local-z axis (3D only)
+            transf_tag: Integer tag identifying transformation
+            vec_x, vec_y, vec_z: X, Y, and Z components of vecxz vector defining local x-z plane (3D only)
+            jnt_offset: Joint offset flag '-jntOffset' (optional)
+            offsets: Joint offset values for nodes i and j (when jnt_offset is specified)
             
-        Example:
-            ops.geomTransf('Linear', 1)                    # 2D transformation
-            ops.geomTransf('Linear', 2, 0.0, 0.0, 1.0)     # 3D transformation
+        Examples:
+            ops.geomTransf('Linear', 1)                                    # 2D basic
+            ops.geomTransf('Linear', 1, 0.0, 0.0, 1.0)                     # 3D with vecxz
+            ops.geomTransf('Linear', 1, None, None, None, '-jntOffset', dI1, dI2, dJ1, dJ2)  # with offsets
+            ops.geomTransf('Linear', 1, 0.0, 0.0, 1.0, '-jntOffset', dI1, dI2, dI3, dJ1, dJ2, dJ3)  # 3D with offsets
         """
         ...
     
-    # P-Delta transformation
+    # PDelta transformation
     @overload
-    def geomTransf(self, transf_type: Literal["PDelta"], transf_tag: int, vec_x_z: Optional[float] = None, vec_y_z: Optional[float] = None, vec_z_z: Optional[float] = None) -> None:
+    def geomTransf(self, transf_type: Literal["PDelta"], transf_tag: int, vec_x: Optional[float] = None, vec_y: Optional[float] = None, vec_z: Optional[float] = None, jnt_offset: Optional[Literal["-jntOffset"]] = None, *offsets: float) -> None:
         """Define P-Delta coordinate transformation
         
         Args:
             transf_type: Transformation type 'PDelta'
-            transf_tag: Unique transformation identifier
-            vec_x_z, vec_y_z, vec_z_z: Vector components defining local-z axis (3D only)
+            transf_tag: Integer tag identifying transformation
+            vec_x, vec_y, vec_z: X, Y, and Z components of vecxz vector defining local x-z plane (3D only)
+            jnt_offset: Joint offset flag '-jntOffset' (optional)
+            offsets: Joint offset values for nodes i and j (when jnt_offset is specified)
             
-        Example:
-            ops.geomTransf('PDelta', 1)                    # 2D P-Delta transformation
-            ops.geomTransf('PDelta', 2, 0.0, 0.0, 1.0)     # 3D P-Delta transformation
+        Examples:
+            ops.geomTransf('PDelta', 1)                                    # 2D basic
+            ops.geomTransf('PDelta', 1, 0.0, 0.0, 1.0)                     # 3D with vecxz
+            ops.geomTransf('PDelta', 1, None, None, None, '-jntOffset', dI1, dI2, dJ1, dJ2)  # with offsets
+            ops.geomTransf('PDelta', 1, 0.0, 0.0, 1.0, '-jntOffset', dI1, dI2, dI3, dJ1, dJ2, dJ3)  # 3D with offsets
         """
         ...
     
     # Corotational transformation
     @overload
-    def geomTransf(self, transf_type: Literal["Corotational"], transf_tag: int, vec_x_z: Optional[float] = None, vec_y_z: Optional[float] = None, vec_z_z: Optional[float] = None) -> None:
+    def geomTransf(self, transf_type: Literal["Corotational"], transf_tag: int, vec_x: Optional[float] = None, vec_y: Optional[float] = None, vec_z: Optional[float] = None, jnt_offset: Optional[Literal["-jntOffset"]] = None, *offsets: float) -> None:
         """Define corotational coordinate transformation
         
         Args:
             transf_type: Transformation type 'Corotational'
-            transf_tag: Unique transformation identifier
-            vec_x_z, vec_y_z, vec_z_z: Vector components defining local-z axis (3D only)
+            transf_tag: Integer tag identifying transformation
+            vec_x, vec_y, vec_z: X, Y, and Z components of vecxz vector defining local x-z plane (3D only)
+            jnt_offset: Joint offset flag '-jntOffset' (optional)
+            offsets: Joint offset values for nodes i and j (when jnt_offset is specified)
             
-        Example:
-            ops.geomTransf('Corotational', 1)              # 2D corotational transformation
-            ops.geomTransf('Corotational', 2, 0.0, 0.0, 1.0) # 3D corotational transformation
+        Examples:
+            ops.geomTransf('Corotational', 1)                              # 2D basic
+            ops.geomTransf('Corotational', 1, 0.0, 0.0, 1.0)               # 3D with vecxz
+            ops.geomTransf('Corotational', 1, None, None, None, '-jntOffset', dI1, dI2, dJ1, dJ2)  # with offsets
         """
         ...
     
     # Generic transformation fallback
     @overload
-    def geomTransf(self, transf_type: str, transf_tag: int, *args: Any) -> None:
-        """Define coordinate transformation (generic fallback)
+    def geomTransf(self, transf_type: Literal["Linear", "PDelta", "Corotational"], transf_tag: int, *transf_args: Any) -> None:
+        """Define coordinate transformation (generic fallback with known types)
         
         Args:
-            transf_type: Transformation type
-            transf_tag: Unique transformation identifier
-            args: Transformation parameters
+            transf_type: Transformation type (Linear, PDelta, or Corotational)
+            transf_tag: Integer tag identifying transformation
+            transf_args: Transformation arguments
             
         Example:
-            ops.geomTransf('SomeOtherTransf', 1, ...)
+            ops.geomTransf('Linear', 1, *args)
         """
         ... 
