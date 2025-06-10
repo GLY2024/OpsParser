@@ -136,8 +136,10 @@ class ElementManager(BaseHandler):
     def get_elements_by_nodes(self, node_tags: list[int]) -> list[int]:
         """Get all elements connected to the specified nodes"""
         result = []
+        if not isinstance(node_tags, list):
+            node_tags = [node_tags]
         for elem_tag, info in self.elements.items():
-            if all(node in info["eleNodes"] for node in node_tags):
+            if all(node in info.get("eleNodes",[]) for node in node_tags):
                 result.append(elem_tag)
         return result
 
