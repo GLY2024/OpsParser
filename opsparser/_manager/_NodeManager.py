@@ -1,22 +1,38 @@
 from typing import Any, Optional, Literal
 
 from ._BaseHandler import BaseHandler
+from ._selector._NodeSelector import NodeSelector
+from ._selector._Selector import Selector, SelectType
 
 
 class NodeManager(BaseHandler):
     def __init__(self):
         self.nodes = {}  # tag -> {coords: [], mass: [], ndf: int}
-        self.ndm = 0  # 模型维度
-        self.ndf = 0  # 节点自由度数
+        self.ndm = 0  # Model dimension
+        self.ndf = 0  # Number of DOFs per node
+        
+
+    def sel(self, **kwargs) -> NodeSelector:
+        """Return node selector with optional selection criteria
+        
+        Args:
+            **kwargs: Selection criteria to apply immediately
+        """
+        selector = NodeSelector(self.nodes)
+        if kwargs:
+            # 第一次调用使用 NEW
+            kwargs['type'] = SelectType.NEW
+            selector.sel(**kwargs)
+        return selector
 
     @property
     def newtag(self) -> int:
-        """return a new tag that is unused"""
+        """Return a new tag that is unused"""
         return self.get_new_tags(1)[0]
     
     @property
     def newtag_upper(self):
-        """return a new tag that is max of all tags + 1"""
+        """Return a new tag that is max of all tags + 1"""
         if not self.nodes:  # Fixed: Check if empty
             return 1
         return max(self.nodes)+1
@@ -87,7 +103,7 @@ class NodeManager(BaseHandler):
     def _handle_node(self, *args: Any, **kwargs: Any):
         arg_map = self._parse("node", *args, **kwargs)
 
-        # 使用_parse处理的结果
+        # Use parsed results
         tag = arg_map.get("tag")
         if not tag:
             return
@@ -100,10 +116,10 @@ class NodeManager(BaseHandler):
         vel = arg_map.get("vel", [])
         accel = arg_map.get("accel", [])
 
-        # 保存节点信息
+        # Save node information
         node_info = {"coords": coords, "ndm": ndm, "ndf": ndf}
 
-        # 如果有质量信息, 也保存下来
+        # Save mass information if provided
         if mass and len(mass) == ndf:
             node_info["mass"] = mass
 
@@ -128,39 +144,39 @@ class NodeManager(BaseHandler):
         if not mass_values:
             return
 
-        # 更新节点质量信息
+        # Update node mass information
         node_info = self.nodes.get(tag, {})
         node_info["mass"] = mass_values
         self.nodes[tag] = node_info
 
     def _handle_model(self, *args: Any, **kwargs: Any):
         arg_map = self._parse("model", *args, **kwargs)
-        # 处理模型维度和自由度设置
+        # Handle model dimension and DOF settings
         args = arg_map.get("args", [])
 
-        # 检查是否有维度参数
+        # Check for dimension parameter
         self.ndm = arg_map["ndm"]
 
-        # 检查是否有自由度参数
+        # Check for DOF parameter
         if "ndf" in arg_map:
             self.ndf = arg_map["ndf"]
         else:
             self.ndf = self.ndm*(self.ndm+1)/2
 
     def get_node_coords(self, tag: int) -> list[float]:
-        """获取节点坐标"""
+        """Get node coordinates"""
         node = self.nodes.get(tag, {})
         return node.get("coords", [])
 
     def get_node_mass(self, tag: int) -> list[float]:
-        """获取节点质量"""
+        """Get node mass"""
         node = self.nodes.get(tag, {})
         return node.get("mass", [])
 
     def get_nodes_by_coords(
         self, x: Optional[float] = None, y: Optional[float] = None, z: Optional[float] = None
     ) -> list[int]:
-        """根据坐标查找节点"""
+        """Find nodes by coordinates"""
         result = []
         for tag, node in self.nodes.items():
             coords = node.get("coords", [])

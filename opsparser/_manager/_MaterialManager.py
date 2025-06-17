@@ -3,6 +3,8 @@ from copy import deepcopy
 from typing import Any, Literal, Optional
 
 from ._BaseHandler import BaseHandler
+from ._selector._MaterialSelector import MaterialSelector
+from ._selector._Selector import SelectType
 from ._Materials import (
     ConcreteHandler,
     ConcreteWallsHandler,
@@ -24,7 +26,7 @@ class MaterialManager(BaseHandler):
         # 统一数据仓库
         self.materials: dict[int, dict] = {}
 
-        # 构建 “命令 -> {matType -> handler}” 映射
+        # 构建 "命令 -> {matType -> handler}" 映射
         self._command2typehandler: dict[str, dict[str, BaseHandler]] = defaultdict(dict)
         handler_classes = [
             StandardModelsHandler,
@@ -44,6 +46,16 @@ class MaterialManager(BaseHandler):
             cmd = cls.handles()[0]
             for typ in cls.types():
                 self._command2typehandler[cmd][typ] = cls(self._command2typehandler[cmd], self.materials)
+
+
+    def sel(self, **kwargs) -> MaterialSelector:
+        """返回材料选择器"""
+        selector = MaterialSelector(self.materials)
+        if kwargs:
+            # 第一次调用使用 NEW
+            kwargs['type'] = SelectType.NEW
+            selector.sel(**kwargs)
+        return selector
 
     @property
     def newtag(self) -> int:

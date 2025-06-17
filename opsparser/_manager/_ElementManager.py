@@ -21,6 +21,8 @@ from ._Elements import (
     PFEMHandler,
     MiscHandler
 )
+from ._selector._ElementSelector import ElementSelector
+from ._selector._Selector import SelectType
 
 
 class ElementManager(BaseHandler):
@@ -28,7 +30,7 @@ class ElementManager(BaseHandler):
         # 统一数据仓库
         self.elements: dict[int, dict] = {}
 
-        # 构建 “命令 -> {eleType -> handler}” 映射
+        # 构建 "命令 -> {eleType -> handler}" 映射
         self._command2typehandler: dict[str, dict[str, BaseHandler]] = defaultdict(dict)
         handler_classes = [
             ZeroLengthHandler,
@@ -52,6 +54,15 @@ class ElementManager(BaseHandler):
             cmd = cls.handles()[0]
             for typ in cls.types():
                 self._command2typehandler[cmd][typ] = cls(self._command2typehandler[cmd], self.elements)
+
+    def sel(self, **kwargs) -> ElementSelector:
+        """返回单元选择器"""
+        selector = ElementSelector(self.elements)
+        if kwargs:
+            # 第一次调用使用 NEW
+            kwargs['type'] = SelectType.NEW
+            selector.sel(**kwargs)
+        return selector
 
     @property
     def newtag(self) -> int:
