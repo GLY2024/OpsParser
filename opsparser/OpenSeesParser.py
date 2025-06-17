@@ -109,6 +109,69 @@ class OpenSeesParser:
             handler_instance = command_enum_member.instance # Get the singleton instance
             handler_instance.clear()
 
+    @property
+    def node(self):
+        return OpenSeesCommand.NODE.instance
+    
+    @property
+    def element(self):
+        return OpenSeesCommand.ELEMENT.instance
+    
+    @property
+    def material(self):
+        return OpenSeesCommand.MATERIAL.instance
+    
+    @property
+    def timeseries(self):
+        return OpenSeesCommand.TIMESERIES.instance
+    
+    @property
+    def load(self):
+        return OpenSeesCommand.LOAD.instance
+    
+    @property
+    def section(self):
+        return OpenSeesCommand.SECTION.instance
+    
+    @property
+    def constraint(self):
+        return OpenSeesCommand.CONSTRAINT.instance
+    
+    @property
+    def region(self):
+        return OpenSeesCommand.REGION.instance
+    
+    @property
+    def rayleigh(self):
+        return OpenSeesCommand.RAYLEIGH.instance
+    
+    @property
+    def block(self):
+        return OpenSeesCommand.BLOCK.instance
+    
+    @property
+    def beam_integration(self):
+        return OpenSeesCommand.BEAM_INTEGRATION.instance
+    
+    @property
+    def friction_model(self):
+        return OpenSeesCommand.FRICTION_MODEL.instance
+    
+    @property
+    def geom_transf(self):
+        return OpenSeesCommand.GEOM_TRANSF.instance
+    
+    @property
+    def analysis(self):
+        return OpenSeesCommand.ANALYSIS.instance
+    
+    @property
+    def recorder(self):
+        return OpenSeesCommand.RECORDER.instance
+    
+    @property
+    def utility(self):
+        return OpenSeesCommand.UTILITY.instance
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
