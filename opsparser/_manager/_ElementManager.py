@@ -60,8 +60,10 @@ class ElementManager(BaseHandler):
         selector = ElementSelector(self.elements)
         if kwargs:
             # 第一次调用使用 NEW
-            kwargs['type'] = SelectType.NEW
+            kwargs['type'] = kwargs.get('type', SelectType.NEW)
             selector.sel(**kwargs)
+        else:
+            selector.sel(type=SelectType.ALL)
         return selector
 
     @property
@@ -157,6 +159,14 @@ class ElementManager(BaseHandler):
     def get_elements_by_type(self, eleType: str) -> list[int]:
         """Get all elements of the specified type"""
         return [tag for tag, data in self.elements.items() if data.get("eleType", "").lower() == eleType.lower()]
+
+    def get_elements_by_material(self, material_tag: int) -> list[int]:
+        """Get all elements using the specified material"""
+        result = []
+        for elem_tag, info in self.elements.items():
+            if info.get("matTag") == material_tag:
+                result.append(elem_tag)
+        return result
 
     def get_elements(
             self,

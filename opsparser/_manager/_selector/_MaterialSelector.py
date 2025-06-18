@@ -44,24 +44,29 @@ class MaterialSelector(Selector):
         # Select by material type
         elif item == MaterialSelectItem.TYPE.value:
             for mid, mat in self._items.items():
-                if vmin <= mat.get('type', 0) <= vmax:
+                if mat.get('matType', '') == vmin:
                     selected.add(mid)
                     
         # Select by material category
         elif item == MaterialSelectItem.CATEGORY.value:
-            for mid, mat in self._items.items():
-                if mat.get('category', '') == vmin:
-                    selected.add(mid)
+            if vmin.lower() in "uniaxialMaterial".lower():
+                for mid, mat in self._items.items():
+                    if mat.get('matType', '') in self._material_manager.uniaxialMaterial_list:
+                        selected.add(mid)
+            elif vmin.lower() in "nDMaterial".lower():
+                for mid, mat in self._items.items():
+                    if mat.get('matType', '') in self._material_manager.nDMaterial_list:
+                        selected.add(mid)
                     
         # Select by property
         elif item == MaterialSelectItem.PROPERTY.value:
-            if not comp or not isinstance(comp, MaterialProperty):
+            if not comp:
                 return set()
                 
             for mid, mat in self._items.items():
-                props = mat.get('properties', {})
-                if comp.value in props:
-                    val = abs(props[comp.value]) if kabs else props[comp.value]
+                # 检查材料属性，如E值
+                if comp == 'E' and 'E' in mat:
+                    val = abs(mat['E']) if kabs else mat['E']
                     if vmin <= val <= vmax:
                         selected.add(mid)
                         
@@ -70,17 +75,17 @@ class MaterialSelector(Selector):
         
     def get_types(self) -> List[int]:
         """Get types of selected materials"""
-        return [mat.get('type', 0) for mat in self]
+        return [mat.get('matType', '') for mat in self]
         
     def get_categories(self) -> List[str]:
         """Get categories of selected materials"""
-        return [mat.get('category', '') for mat in self]
+        return [mat.get('materialType', '') for mat in self]
         
     def get_properties(self) -> List[Dict[str, float]]:
         """Get properties of selected materials"""
-        return [mat.get('properties', {}) for mat in self]
+        return [mat for mat in self]
         
-    def used_by_elements(self) -> List[List[int]]:
+    def used_by_elements(self) -> List[int]:
         """Get elements using selected materials"""
         if not self._element_manager:
             return []
@@ -88,5 +93,9 @@ class MaterialSelector(Selector):
         result = []
         for mat_id in self._current_selection:
             elements = self._element_manager.get_elements_by_material(mat_id)
-            result.append(elements)
-        return result 
+            result.extend(elements)
+        return result
+        
+    def by_type(self, type_name: str) -> 'MaterialSelector':
+        """Filter materials by type"""
+        return self.filter(lambda mat: mat.get('matType', '') == type_name) 

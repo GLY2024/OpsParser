@@ -10,6 +10,7 @@ from ._manager import (
     RayleighManager, BlockManager, BeamIntegrationManager, FrictionModelManager, 
     GeomTransfManager, AnalysisManager, RecorderManager, UtilityManager
 )
+from ._manager._selector._Selector import Selector
 from .enhanced_opensees import EnhancedOpenSees, enhance_opensees
 
 
@@ -51,6 +52,13 @@ class OpenSeesParser:
         self.enhanced_opensees = None
         
         self.dispatch_table: dict[str, BaseHandler] = self._build_dispatch_table()
+        Selector.set_managers(
+            node_manager=self.node,
+            element_manager=self.element,
+            material_manager=self.material,
+            section_manager=self.section,
+            constraint_manager=self.constraint,
+        )
     
     def enhance(self, module=None, debug=False):
         if module is None:

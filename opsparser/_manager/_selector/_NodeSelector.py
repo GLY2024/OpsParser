@@ -52,8 +52,9 @@ class NodeSelector(Selector):
         # Select by node ID
         if item == NodeSelectItem.TAG:
             if isinstance(vmin, (int, float)):
+                tol = kwargs.get('tol', 1e-6)
                 selected = {nid for nid in self._items.keys() 
-                          if vmin <= nid <= vmax and (nid - vmin) % vinc == 0}
+                          if vmin - tol <= nid <= vmax + tol and (nid - vmin) % vinc == 0}
                           
         # Select by coordinates
         elif item == NodeSelectItem.COORD:
@@ -83,17 +84,6 @@ class NodeSelector(Selector):
                     radius = math.sqrt(sum(c*c for c in coords[:2]))
                     if vmin <= radius <= vmax:
                         selected.add(nid)
-                        
-        # Select by angle
-        elif item == NodeSelectItem.ANGLE:
-            for nid, node in self._items.items():
-                coords = node.get('coords', [])
-                if len(coords) >= 2:
-                    angle = math.degrees(math.atan2(coords[1], coords[0]))
-                    if angle < 0:
-                        angle += 360
-                    if vmin <= angle <= vmax:
-                        selected.add(nid)
                             
         return selected
         
@@ -117,7 +107,7 @@ class NodeSelector(Selector):
         """Get accelerations of selected nodes"""
         return [node.get('accel', []) for node in self]
         
-    def get_connected_elements(self) -> List[List[int]]:
+    def get_connected_elements(self) -> List[int]:
         """Get elements connected to selected nodes"""
         if not self._element_manager:
             return []
@@ -125,5 +115,20 @@ class NodeSelector(Selector):
         result = []
         for node_id in self._current_selection:
             elements = self._element_manager.get_elements_by_nodes(node_id)
-            result.append(elements)
-        return result 
+            result.extend(elements)
+        return list(set(result))
+        
+    def by_coords(self, x: Optional[float] = None, y: Optional[float] = None, z: Optional[float] = None) -> 'NodeSelector':
+        """Filter nodes by coordinates"""
+        def coord_filter(node):
+            coords = node.get('coords', [])
+            if len(coords) < 1:
+                return False
+            if x is not None and (len(coords) < 1 or abs(coords[0] - x) > 1e-6):
+                return False
+            if y is not None and (len(coords) < 2 or abs(coords[1] - y) > 1e-6):
+                return False
+            if z is not None and (len(coords) < 3 or abs(coords[2] - z) > 1e-6):
+                return False
+            return True
+        return self.filter(coord_filter) 

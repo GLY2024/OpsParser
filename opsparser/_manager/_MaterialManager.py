@@ -53,8 +53,10 @@ class MaterialManager(BaseHandler):
         selector = MaterialSelector(self.materials)
         if kwargs:
             # 第一次调用使用 NEW
-            kwargs['type'] = SelectType.NEW
+            kwargs['type'] = kwargs.get('type', SelectType.NEW)
             selector.sel(**kwargs)
+        else:
+            selector.sel(type=SelectType.ALL)
         return selector
 
     @property

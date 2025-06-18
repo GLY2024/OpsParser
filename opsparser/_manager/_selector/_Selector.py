@@ -18,7 +18,6 @@ class NodeSelectItem(Enum):
     TAG = 'Tag'    # Select by node ID
     COORD = 'Coord'      # Select by coordinates
     RADIUS = 'Radius' # Select by radial distance
-    ANGLE = 'Angle'  # Select by angle
     NDF = 'NDF'      # Select by number of DOFs
 
 class NodeSelectComp(Enum):
