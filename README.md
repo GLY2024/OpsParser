@@ -21,12 +21,13 @@ pip install opsparser
 ## Quick Start
 
 ```python
-import openseespy.opensees as ops
+import openseespy.opensees as old_ops
 from opsparser import OpenSeesParser
 
 # first hook all commands before your opensees code
-parser = OpenSeesParser(ops)
+parser = OpenSeesParser(old_ops)
 parser.hook_all(debug = False) # Set debug = True to show parsing process
+ops = parser.enhance()         # enhanced ops module with IDE hints
 
 # your OpenSeesPy Code
 # ...
