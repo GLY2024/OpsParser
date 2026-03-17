@@ -1,8 +1,7 @@
 from typing import Any
 
-import openseespy.opensees as ops
-
 from .._BaseHandler import SubBaseHandler
+from .._NodeManager import NodeManager
 
 
 class BearingHandler(SubBaseHandler):
@@ -19,8 +18,7 @@ class BearingHandler(SubBaseHandler):
         rules = {"alternative": True}
 
         # 获取维度信息
-        ndm = ops.getNDM()[0]
-        assert len(ops.getNDM()) == 1, f"Invalid length of ndm, expected 1, got {len(ops.getNDM()) =}"  # noqa: S101
+        ndm = NodeManager().ndm
 
         # 添加不同支座类型的规则
         # elastomericBearingPlasticity 规则
@@ -352,7 +350,7 @@ class BearingHandler(SubBaseHandler):
         }
 
         # 处理3D情况下的额外参数
-        if ops.getNDM()[0] == 3:
+        if NodeManager().ndm == 3:
             eleinfo["TMatTag"] = arg_map.get("TMatTag")
             eleinfo["MyMatTag"] = arg_map.get("MyMatTag")
 
@@ -394,7 +392,7 @@ class BearingHandler(SubBaseHandler):
         }
 
         # 处理3D情况下的额外参数
-        if ops.getNDM()[0] == 3:
+        if NodeManager().ndm == 3:
             eleinfo["TMatTag"] = arg_map.get("TMatTag")
             eleinfo["MyMatTag"] = arg_map.get("MyMatTag")
 
@@ -430,7 +428,7 @@ class BearingHandler(SubBaseHandler):
         }
 
         # 处理3D情况下的额外参数
-        if ops.getNDM()[0] == 3:
+        if NodeManager().ndm == 3:
             eleinfo["TMatTag"] = arg_map.get("TMatTag")
             eleinfo["MyMatTag"] = arg_map.get("MyMatTag")
 
@@ -471,7 +469,7 @@ class BearingHandler(SubBaseHandler):
         }
 
         # 处理3D情况下的额外参数
-        if ops.getNDM()[0] == 3:
+        if NodeManager().ndm == 3:
             eleinfo["TMatTag"] = arg_map.get("TMatTag")
             eleinfo["MyMatTag"] = arg_map.get("MyMatTag")
 
@@ -764,7 +762,7 @@ class BearingHandler(SubBaseHandler):
         }
 
         # 处理3D情况下的额外参数
-        if ops.getNDM()[0] == 3:
+        if NodeManager().ndm == 3:
             eleinfo["VzMatTag"] = arg_map.get("VzMatTag")
             eleinfo["TMatTag"] = arg_map.get("TMatTag")
             eleinfo["MyMatTag"] = arg_map.get("MyMatTag")

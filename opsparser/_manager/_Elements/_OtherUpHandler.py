@@ -1,8 +1,7 @@
 from typing import Any
 
-import openseespy.opensees as ops
-
 from .._BaseHandler import SubBaseHandler
+from .._NodeManager import NodeManager
 
 
 class OtherUpHandler(SubBaseHandler):
@@ -19,8 +18,7 @@ class OtherUpHandler(SubBaseHandler):
         rules = {"alternative": True}
 
         # ndm for 2D/3D if needed
-        ndm = ops.getNDM()[0]
-        assert len(ops.getNDM()) == 1, f"Invalid length of ndm, expected 1, got {len(ops.getNDM()) =}"  # noqa: S101
+        ndm = NodeManager().ndm
 
         # 添加不同元素类型的规则
         if ndm == 2:

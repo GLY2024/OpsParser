@@ -5,7 +5,7 @@ This package contains all command handlers for different OpenSeesPy command cate
 Each manager handles a specific group of related commands and maintains their state.
 """
 
-from ._BaseHandler import BaseHandler, SingletonMeta
+from ._BaseHandler import BaseHandler, SubBaseHandler, SingletonMeta
 from ._NodeManager import NodeManager
 from ._ElementManager import ElementManager
 from ._MaterialManager import MaterialManager
@@ -25,6 +25,7 @@ from ._UtilityManager import UtilityManager
 
 __all__ = [
     'BaseHandler',
+    'SubBaseHandler',
     'SingletonMeta',
     'NodeManager',
     'ElementManager',

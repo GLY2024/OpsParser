@@ -6,7 +6,6 @@ Unified solution that combines IDE support with powerful parsing capabilities
 
 from typing import Any, Callable
 from types import ModuleType
-import inspect
 
 class EnhancedOpenSees:
     """Enhanced OpenSees wrapper with complete IDE support + optional parsing"""

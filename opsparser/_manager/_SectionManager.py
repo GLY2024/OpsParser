@@ -2,9 +2,8 @@ from typing import Any, Optional, Dict, List, Literal
 from collections import defaultdict
 from copy import deepcopy
 import warnings
-import openseespy.opensees as ops
-
 from ._BaseHandler import BaseHandler, SubBaseHandler
+from ._NodeManager import NodeManager
 
 
 class SectionHandler(SubBaseHandler):
@@ -19,7 +18,7 @@ class SectionHandler(SubBaseHandler):
 
     @property
     def _COMMAND_RULES(self) -> dict[str, dict[str, Any]]:
-        ndm = ops.getNDM()[0]
+        ndm = NodeManager().ndm
         return {
             "section": {
                 "alternative": True,
@@ -136,7 +135,7 @@ class SectionHandler(SubBaseHandler):
         section('Elastic', secTag, E_mod, A, Iz, Iy, G_mod, Jxx, alphaY=None, alphaZ=None)   # 3D
         """
         arg_map = self._parse(self.handles()[0], *args, **kwargs)
-        ndm = ops.getNDM()
+        ndm = NodeManager().ndm
         secTag = arg_map.get("secTag")
         if ndm == 2:
             section_info = {

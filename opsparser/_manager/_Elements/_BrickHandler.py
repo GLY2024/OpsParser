@@ -1,7 +1,5 @@
 from typing import Any
 
-import openseespy.opensees as ops
-
 from .._BaseHandler import SubBaseHandler
 
 
