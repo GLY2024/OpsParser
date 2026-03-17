@@ -374,9 +374,7 @@ class BeamColumnHandler(SubBaseHandler):
             eleinfo['mass'] = arg_map.get('mass', 0.0)
 
         if 'intType' in arg_map:
-            # Since intType is a str, extract it manually
-            idx = args.index("-integration")
-            eleinfo['intType'] = args[idx+1]
+            eleinfo['intType'] = arg_map['intType']
 
         self.elements[eleTag] = eleinfo
 

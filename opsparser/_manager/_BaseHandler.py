@@ -441,9 +441,12 @@ class BaseHandler(ABC, metaclass=SingletonMeta):
         # If rule has alternatives, means this command has many alternative rules, so need to check which rule to use
         alternative = rule.get("alternative", False)
         if alternative:
-            # if not isinstance(rule, defaultdict):
-            #     warnings.warn(f"Rule for command {func_name} is not a defaultdict; unexpected behavior may occur.", UserWarning, stacklevel=2)
-            specific_rule = rule[args[0]]   # if not defaultdict and args[0] is not a key, will raise KeyError
+            if not args:
+                raise ValueError(f"Command '{func_name}' requires at least one argument to determine the subtype")
+            specific_rule = rule.get(args[0])
+            if specific_rule is None:
+                raise KeyError(f"Unknown subtype '{args[0]}' for command '{func_name}'")
+
             return self._parse_rule_based_command(specific_rule, *args, **kwargs)
 
         # Otherwise use rule-based parsing directly

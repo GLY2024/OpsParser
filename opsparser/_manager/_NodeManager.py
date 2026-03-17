@@ -163,7 +163,7 @@ class NodeManager(BaseHandler):
         if "ndf" in arg_map:
             self.ndf = arg_map["ndf"]
         else:
-            self.ndf = self.ndm*(self.ndm+1)/2
+            self.ndf = self.ndm * (self.ndm + 1) // 2
 
     def get_node_coords(self, tag: int) -> list[float]:
         """Get node coordinates"""

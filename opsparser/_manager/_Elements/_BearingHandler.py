@@ -578,7 +578,9 @@ class BearingHandler(SubBaseHandler):
 
         # 处理可选参数
         if "-shape" in args:
-            eleinfo["shape"] = args[args.index("-shape")+1]
+            shape_idx = args.index("-shape")
+            if shape_idx + 1 < len(args):
+                eleinfo["shape"] = args[shape_idx + 1]
 
         if "totalHeight" in arg_map:
             eleinfo["totalHeight"] = arg_map.get("totalHeight")
