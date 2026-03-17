@@ -43,4 +43,4 @@ def test_node_command(spy_instance: OpenSeesParser):
     assert len(node_manager.nodes) == 1, "应该有一个节点"
     node = node_manager.nodes[1]
     assert node["coords"] == [0.0, 0.0, 0.1], "节点坐标应为 [0.0, 0.0, 0.1]"
-    assert node["ndf"] == 6, "节点自由度应为 2"
+    assert node["ndf"] == 6, "节点自由度应为 6"

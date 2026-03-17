@@ -97,6 +97,18 @@ def test_handle_Concrete07(material_manager: MaterialManager) -> None:
     args = ("Concrete07", 4, -30.0, -0.002, 28000.0, 3.5, 0.0001, 4.0, 15.0, 1.2)
     material_manager.handle(cmd, {"args": args, "kwargs": {}})
 
+    material_data = material_manager.materials[4]
+    assert material_data["matType"] == "Concrete07"
+    assert material_data["matTag"] == 4
+    assert material_data["fc"] == -30.0
+    assert material_data["epsc"] == -0.002
+    assert material_data["Ec"] == 28000.0
+    assert material_data["ft"] == 3.5
+    assert material_data["et"] == 0.0001
+    assert material_data["xp"] == 4.0
+    assert material_data["xn"] == 15.0
+    assert material_data["r"] == 1.2
+
 
 def test_handle_Concrete01WithSITC(material_manager: MaterialManager) -> None:
     """测试Concrete01WithSITC材料的数据处理"""
