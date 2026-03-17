@@ -16,7 +16,7 @@ __all__ = [
     "ConcreteWallsHandler",
     "ContactMaterialsHandler",
     "InitialStateHandler",
-    "OtherUniaxialHandler"
+    "OtherUniaxialHandler",
     "PyTzQzHandler",
     "StandardModelsHandler",
     "StandardUniaxialHandler",

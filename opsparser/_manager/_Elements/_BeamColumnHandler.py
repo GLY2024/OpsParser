@@ -1,8 +1,7 @@
 from typing import Any
 
-import openseespy.opensees as ops
-
 from .._BaseHandler import SubBaseHandler
+from .._NodeManager import NodeManager
 
 
 class BeamColumnHandler(SubBaseHandler):
@@ -19,8 +18,7 @@ class BeamColumnHandler(SubBaseHandler):
         rules = {"alternative": True}
 
         # ndm for 2D/3D if needed
-        ndm = ops.getNDM()[0]
-        assert len(ops.getNDM()) == 1, f"Invalid length of ndm, expected 1, got {len(ops.getNDM()) =}"  # noqa: S101
+        ndm = NodeManager().ndm
 
         # 添加不同元素类型的规则
         if ndm == 2:
@@ -175,7 +173,7 @@ class BeamColumnHandler(SubBaseHandler):
         # Check if there are unparsed positional args, if yes, it means we should use the second format
         if len(arg_map.get("args",[])) > 1:
             command_type = 2
-            ndm = ops.getNDM()[0]
+            ndm = NodeManager().ndm
             if ndm == 2:
                 rule = {
                     "positional": ["eleType", "eleTag", "eleNodes*2", "Area", "E_mod", "Iz", "transfTag"],
@@ -286,7 +284,7 @@ class BeamColumnHandler(SubBaseHandler):
         }
 
         # Add 3D specific parameters if present
-        ndm = ops.getNDM()[0]
+        ndm = NodeManager().ndm
         if ndm == 3:
             eleinfo["Jxx"] = arg_map.get("Jxx")
             eleinfo["Iy"] = arg_map.get("Iy")

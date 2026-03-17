@@ -5,17 +5,17 @@ Unified solution that combines IDE support with powerful parsing capabilities
 """
 
 from typing import Any, Callable
-import openseespy.opensees as ops
+from types import ModuleType
 import inspect
 
 class EnhancedOpenSees:
     """Enhanced OpenSees wrapper with complete IDE support + optional parsing"""
     
-    def __init__(self, original_ops: ops, debug: bool = False):
-        """Initialize with original openseespy.opensees module
-        
+    def __init__(self, original_ops: ModuleType, debug: bool = False):
+        """Initialize with original openseespy.opensees module (or compatible module like xara)
+
         Args:
-            original_ops: Original openseespy.opensees module
+            original_ops: OpenSees-compatible module (openseespy.opensees or xara equivalent)
             debug: Enable debug output for parsing
         """
         self._ops = original_ops
@@ -69,11 +69,11 @@ class EnhancedOpenSees:
             return original_attr
 
 
-def enhance_opensees(original_ops: ops, debug: bool = False) -> EnhancedOpenSees:
+def enhance_opensees(original_ops: ModuleType, debug: bool = False) -> EnhancedOpenSees:
     """Create an enhanced OpenSees object with IDE support and optional parsing
-    
+
     Args:
-        original_ops: Original openseespy.opensees module
+        original_ops: OpenSees-compatible module (openseespy.opensees or xara equivalent)
         debug: Enable debug output for parsing operations
         
     Returns:

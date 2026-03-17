@@ -1,5 +1,5 @@
 from typing import Any, Dict, Generator, List, Optional, Set, Union, Callable, TypeVar, Generic, Type
-from abc import ABC, abstractmethod, ABCMeta
+from abc import ABCMeta
 from enum import Enum
 
 class SelectType(Enum):
@@ -56,24 +56,17 @@ class MaterialProperty(Enum):
     ALPX = 'ALPX'    # Thermal expansion coefficient
     DENS = 'DENS'    # Density
 
-class SingletonMeta(ABCMeta):
-    """
-    A metaclass that implements the Singleton pattern.
-    Ensures only one instance of a class is created.
-    """
-    _instances = {}
+class _SelectorSingletonMeta(ABCMeta):
+    """Singleton metaclass for selectors (simplified, no __getattribute__ proxy)."""
+    _instances: dict = {}
 
     def __call__(cls, *args, **kwargs):
-        """
-        Override the __call__ method to implement Singleton behavior.
-        Returns the existing instance if it exists, otherwise creates a new one.
-        """
         if cls not in cls._instances:
             instance = super().__call__(*args, **kwargs)
             cls._instances[cls] = instance
         return cls._instances[cls]
 
-class Selector(metaclass=SingletonMeta):
+class Selector(metaclass=_SelectorSingletonMeta):
     """Base selector class that implements selection operations similar to ANSYS commands"""
     
     # Class-level manager references

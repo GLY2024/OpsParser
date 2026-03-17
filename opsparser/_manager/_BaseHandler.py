@@ -159,12 +159,6 @@ class BaseHandler(ABC, metaclass=SingletonMeta):
         """Return a list of function names this handler can process."""
         raise NotImplementedError
 
-    @staticmethod
-    @abstractmethod
-    def handles() -> list[str]:
-        """返回该处理器支持的命令列表(如 element / uniaxialMaterial / nDMaterial)"""
-        raise NotImplementedError
-
     @abstractmethod
     def handle(self, func_name: str, arg_map: dict[str, Any]):
         """Process the function *func_name* using the already parsed *arg_map*."""
