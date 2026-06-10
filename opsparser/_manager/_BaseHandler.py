@@ -302,8 +302,9 @@ class BaseHandler(ABC, metaclass=SingletonMeta):
 
         # 如果有解析出选项标志, 并且存在args字段, 则清理args中的选项标志及其值
         if option_result and "args" in result and orig_args:
-            # 获取所有选项标志
-            option_flags = rule.get("options", {}).keys()
+            # 获取所有选项标志 (去掉 '*' / '?' 后缀, 与 args 中的原始 token 对齐)
+            option_flags = {flag.split('*')[0].rstrip('?') for flag in rule.get("options", {})}
+            string_flags = rule.get("string_flags", ['-file', '-xml', '-binary', '-time'])
             # 清理args中的选项标志及其值
             cleaned_args = []
             skip_count = 0
@@ -316,7 +317,10 @@ class BaseHandler(ABC, metaclass=SingletonMeta):
                 # 如果当前项是选项标志, 跳过它及其值
                 if isinstance(item,str) and item in option_flags:
                     # 获取这个选项后面的值的数量
-                    values = BaseHandler._extract_args_by_str(orig_args[i:], item)
+                    if item in string_flags:
+                        values = BaseHandler._extract_args_with_strings(orig_args[i:], item, 1)
+                    else:
+                        values = BaseHandler._extract_args_by_str(orig_args[i:], item)
                     skip_count = len(values)
                     continue
 
@@ -387,11 +391,16 @@ class BaseHandler(ABC, metaclass=SingletonMeta):
         """Parse option flags according to rule."""
         result: dict[str, Any] = {}
 
+        # Flags whose values may be (or include) plain strings.  Rules can
+        # declare their own list via "string_flags"; otherwise fall back to
+        # the legacy global defaults.
+        string_flags = rule.get("string_flags", ['-file', '-xml', '-binary', '-time'])
+
         for flag, name in rule.get("options", {}).items():
             pure_flag = flag.split('*')[0].rstrip('?')
             if pure_flag in arg_list:
                 # Special handling for string options like -file
-                if pure_flag in ['-file', '-xml', '-binary', '-time']:
+                if pure_flag in string_flags:
                     values = BaseHandler._extract_args_with_strings(arg_list, pure_flag, 1)
                 else:
                     values = BaseHandler._extract_args_by_str(arg_list, pure_flag)
