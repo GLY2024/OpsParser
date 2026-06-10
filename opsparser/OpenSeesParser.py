@@ -80,10 +80,28 @@ class OpenSeesParser:
                  dispatch_table[func_name] = handler_instance
         return dispatch_table
 
+    #: callable types that hook_all intercepts; bound-method types make the
+    #: parser work with object-style interpreters too (e.g. ``xara.Model``)
+    _HOOKABLE_TYPES = (
+        types.FunctionType,
+        types.BuiltinFunctionType,
+        types.MethodType,
+        types.MethodWrapperType,
+    )
+
     def hook_all(self, debug = False):
         for name in dir(self.module):
+            if name.startswith("_"):
+                continue
             attr = getattr(self.module, name)
-            if isinstance(attr, (types.FunctionType, types.BuiltinFunctionType)):
+            # Never wrap a wrapper: hooking an already-hooked module (e.g.
+            # from a second OpenSeesParser instance) would dispatch every
+            # command to the handlers multiple times. Re-hook the original
+            # function instead so the newest parser takes over cleanly.
+            original = getattr(attr, "__opsparser_original__", None)
+            if original is not None:
+                self._hook_function(name, original, debug)
+            elif isinstance(attr, self._HOOKABLE_TYPES):
                 self._hook_function(name, attr, debug)
 
     def _hook_function(self, name, func, debug = False):
@@ -104,6 +122,7 @@ class OpenSeesParser:
 
             return func(*args, **kwargs)
 
+        wrapper.__opsparser_original__ = func
         setattr(self.module, name, wrapper)
 
     def restore_all(self):

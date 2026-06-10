@@ -218,6 +218,14 @@ class UtilityManager(BaseHandler, metaclass=SingletonMeta):
         self.log_file = None
         self.database_info = {}
 
+        # `wipe` destroys the whole OpenSees model, so the data tracked by
+        # every other manager singleton must be cleared as well.
+        from ._BaseHandler import BaseHandler, SingletonMeta
+        for instance in SingletonMeta._instances.values():
+            if instance is self or not isinstance(instance, BaseHandler):
+                continue
+            instance.clear()
+
     def _handle_wipe_analysis(self, *args: Any, **kwargs: Any) -> None:
         """Handle wipeAnalysis command."""
         # Would clear analysis objects only
